@@ -11,7 +11,7 @@ pygame.init()
 pygame.midi.init()
 
 # playing music!
-pygame.mixer.music.load("morse_code_a.mid")
+pygame.mixer.music.load("part_melody.mid")
 pygame.mixer.music.play()
 while pygame.mixer.music.get_busy():
     pygame.time.wait(1000)
