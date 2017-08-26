@@ -1,28 +1,29 @@
-#!/usr/bin/env python
-"""                                                                            
-Play MIDI file on output port.
+'''
+Created on May 20, 2017
 
-Run with (for example):
+@author: Raz
+'''
 
-    ./play_midi_file.py 'SH-201 MIDI 1' 'test.mid'
-"""
+import numpy as np
+import pygame
+import pygame.midi
+pygame.init()
+pygame.midi.init()
 
-import sys
-import mido
-from mido import MidiFile
+# playing music!
+pygame.mixer.music.load("morse_code_a.mid")
+pygame.mixer.music.play()
+while pygame.mixer.music.get_busy():
+    pygame.time.wait(1000)
 
-filename = 'AUD_DW0146.mid'  # sys.argv[1]
-if len(sys.argv) == 3:
-    portname = sys.argv[2]
-else:
-    portname = None
+# # loading music for reading!
+# # list all the midi devices
+# for x in range( 0, pygame.midi.get_count() ):
+#     print pygame.midi.get_device_info(x)
 
-with mido.open_output(portname) as output:
-    try:
-        for message in MidiFile(filename).play():
-            print(message)
-            output.send(message)
+# # open a specific midi device
+# inp = pygame.midi.Input(1,0)
+# a = inp.read()
+# print a
 
-    except KeyboardInterrupt:
-        print()
-        output.reset()
+print 'gaga'
