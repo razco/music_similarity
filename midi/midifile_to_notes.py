@@ -4,18 +4,32 @@ import json
 import mido
 import numpy as np
 
-def remove_duplicates(notes_for_alg):
+def remove_duplicates(notes_for_alg, notes_for_alg_inds):
+    
+#   modify melody: remove common preceding notes
+    prev_notes = notes_for_alg[0]
+    for idx in xrange(len(notes_for_alg) - 1):
+        curr_notes = notes_for_alg[idx + 1]
+        notes_for_alg[idx + 1] = curr_notes.difference(prev_notes)
+        prev_notes = curr_notes
+#     
     # run until the second note: because of comparison with the previous one
-    for idx in xrange(len(notes_for_alg)-1, 0, -1):
+    for idx in xrange(len(notes_for_alg) - 1, 0, -1):
         if len(notes_for_alg[idx]) == 0:
             del notes_for_alg[idx]
+            del notes_for_alg_inds[idx]
             continue
         curr_num_notes = len(notes_for_alg[idx])
         if curr_num_notes != len(notes_for_alg[idx - 1]):
             continue
-        if all([notes_for_alg[idx][note_idx] == notes_for_alg[idx - 1][note_idx] for note_idx in xrange(curr_num_notes)]):
+        if len(notes_for_alg[idx].symmetric_difference(notes_for_alg[idx - 1])) == 0:
             del notes_for_alg[idx]
-    return notes_for_alg
+            del notes_for_alg_inds[idx]
+    
+    for idx in xrange(len(notes_for_alg)):
+        notes_for_alg[idx] = np.array(list(notes_for_alg[idx]))
+
+    return notes_for_alg, notes_for_alg_inds
             
 
 def midifile_to_dict(mid):
@@ -43,18 +57,20 @@ def extract_notes(midi_file):
     
     
     notes_for_alg = []
-    notes_for_alg.append([])
+    notes_for_alg.append(set())
+    notes_for_alg_inds = []
     NUM_DIFFERENT_NOTES = 12
-    for note in notes_data:
+    for note_idx, note in enumerate(notes_data):
         if note['time'] > 0:
             is_last_note_empty = len(notes_for_alg[-1]) == 0
             if not is_last_note_empty:
-                notes_for_alg[-1] = np.unique(np.array(notes_for_alg[-1]))
-                notes_for_alg.append([])
+                notes_for_alg.append(set())
         if note['velocity'] > 0:
-            notes_for_alg[-1].append(note['note'] % 12)
+            notes_for_alg[-1].add(note['note'] % NUM_DIFFERENT_NOTES)
+            notes_for_alg_inds.append(note_idx)
     # print(json.dumps(midifile_to_dict(mid), indent=2))
-    notes_for_alg = remove_duplicates(notes_for_alg)
+    notes_for_alg, notes_for_alg_inds = remove_duplicates(
+        notes_for_alg, notes_for_alg_inds)
     return notes_for_alg
 
 

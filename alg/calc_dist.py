@@ -98,7 +98,7 @@ def run_levenshtein(music_1, music_2, levenshtein_mat):
 
 
 def extract_notes(midi_file):
-    import src.mido.midifile_to_notes as to_notes
+    import midi.midifile_to_notes as to_notes
     return to_notes.extract_notes(midi_file)
 
 
