@@ -12,8 +12,8 @@ import os
 
 def init_levenshtein_mat(notes1, notes2):
     levenshtein_mat = np.zeros((len(notes1)+1, len(notes2)+1))
-    levenshtein_mat[0,:] = np.arange(0, len(notes2)+1)
-    levenshtein_mat[:,0] = np.arange(0, len(notes1)+1)
+    levenshtein_mat[0, :] = np.arange(0, len(notes2)+1)
+    levenshtein_mat[:, 0] = np.arange(0, len(notes1)+1)
     return levenshtein_mat
 
 
@@ -33,13 +33,16 @@ def run(notes1, notes2):
     for shift in xrange(num_diff_notes):
         print 'running shift%d:' % shift
         notes1_shift = shift_notes(notes1, shift)
-        levenshtein_mat = init_levenshtein_mat(notes1_shift, notes2)
-        score = run_levenshtein(notes1_shift, notes2, levenshtein_mat)
+        levenshtein_mat = run_levenshtein(notes1_shift, notes2)
+        score = levenshtein_mat[
+            levenshtein_mat.shape[0], levenshtein_mat.shape[1]]
+        print 'score: %f' % score
         scores.append(score)
     print 'running window...'
     max_score_shift = np.argmin(np.array(scores))
     notes1_shift = shift_notes(notes1, max_score_shift)
     run_window_levenshtein(notes1_shift, notes2)
+
 
 def calc_new_distance(left_ld, top_ld, diag_ld, music_1_val, music_2_val):
     new_cost = np.inf
@@ -65,42 +68,32 @@ def run_window_levenshtein(music_1, music_2):
         rel_music_1 = music_1[music_1_win_idx:music_1_win_idx + window_size]
         for music_2_win_idx in xrange(0, len(music_2) - window_size + 1):
             rel_music_2 = music_2[music_2_win_idx:music_2_win_idx + window_size]
-            levenshtein_mat = init_levenshtein_mat(rel_music_1, rel_music_2)
-            for music_1_idx in xrange(window_size):
-                lm_1_idx = music_1_idx + 1  # levenshtein_mat idx for music 1
-                for music_2_idx in xrange(window_size):
-                    lm_2_idx = music_2_idx + 1  # levenshtein_mat idx for music 2
-                    new_dist = calc_new_distance(levenshtein_mat[lm_1_idx, lm_2_idx - 1],
-                                                 levenshtein_mat[lm_1_idx - 1, lm_2_idx],
-                                                 levenshtein_mat[lm_1_idx - 1, lm_2_idx - 1],
-                                                 rel_music_1[music_1_idx], rel_music_2[music_2_idx])
-                    levenshtein_mat[lm_1_idx, lm_2_idx] = new_dist
-#     print(levenshtein_mat)
-
-#     print("OK... last val")
+            levenshtein_mat = run_levenshtein(rel_music_1, rel_music_2)
             score = levenshtein_mat[len(rel_music_1), len(rel_music_2)]
             if score < max_score:
                 max_score = score
                 max_score_music_1_idx = music_1_win_idx
                 max_score_music_2_idx = music_2_win_idx
-    print 'best match with window: %f at music1 index %d, and music2 index %d' % (max_score, max_score_music_1_idx, max_score_music_2_idx)
+    print (
+        'best match with window: %f at music1 index %d, and music2 index %d' %
+        (max_score, max_score_music_1_idx, max_score_music_2_idx)
+    )
 
 
-def run_levenshtein(music_1, music_2, levenshtein_mat):
+def run_levenshtein(music_1, music_2):
+    levenshtein_mat = init_levenshtein_mat(music_1, music_2)
     for music_1_idx in range(len(music_1)):
         lm_1_idx = music_1_idx + 1  # levenshtein_mat idx for music 1
         for music_2_idx in range(len(music_2)):
             lm_2_idx = music_2_idx + 1  # levenshtein_mat idx for music 2
-            new_dist = calc_new_distance(levenshtein_mat[lm_1_idx, lm_2_idx - 1],
-                                         levenshtein_mat[lm_1_idx - 1, lm_2_idx],
-                                         levenshtein_mat[lm_1_idx - 1, lm_2_idx - 1],
-                                         music_1[music_1_idx], music_2[music_2_idx])
+            new_dist = calc_new_distance(
+                levenshtein_mat[lm_1_idx, lm_2_idx - 1],
+                levenshtein_mat[lm_1_idx - 1, lm_2_idx],
+                levenshtein_mat[lm_1_idx - 1, lm_2_idx - 1],
+                music_1[music_1_idx], music_2[music_2_idx]
+            )
             levenshtein_mat[lm_1_idx, lm_2_idx] = new_dist
-#     print(levenshtein_mat)
-
-#     print("OK... last val")
-    print 'score: %f' % levenshtein_mat[len(music_1), len(music_2)]
-    return levenshtein_mat[len(music_1), len(music_2)]
+    return levenshtein_mat
 
 
 def extract_notes(midi_file):
@@ -114,8 +107,8 @@ def load_args():
     midi_file2 = ''
     argv = sys.argv[1:]
     try:
-        opts, _ = getopt.getopt(argv,"h1:2:",["midi1=","midi2="])
-    except:
+        opts, _ = getopt.getopt(argv, "h1:2:", ["midi1=", "midi2="])
+    except getopt.GetoptError:
         print '%s -1 <midi_file1> -2 <midi_file2>' % script_name
         sys.exit(2)
     for opt, arg in opts:
