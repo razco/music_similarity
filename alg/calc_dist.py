@@ -35,7 +35,7 @@ def run(notes1, notes2):
         notes1_shift = shift_notes(notes1, shift)
         levenshtein_mat = run_levenshtein(notes1_shift, notes2)
         score = levenshtein_mat[
-            levenshtein_mat.shape[0], levenshtein_mat.shape[1]]
+            levenshtein_mat.shape[0] - 1, levenshtein_mat.shape[1] - 1]
         print 'score: %f' % score
         scores.append(score)
     print 'running window...'
