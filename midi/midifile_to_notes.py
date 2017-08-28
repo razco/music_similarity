@@ -26,8 +26,8 @@ def remove_duplicates(notes_for_alg, notes_for_alg_inds):
             del notes_for_alg[idx]
             del notes_for_alg_inds[idx]
     
-    for idx in xrange(len(notes_for_alg)):
-        notes_for_alg[idx] = np.array(list(notes_for_alg[idx]))
+#     for idx in xrange(len(notes_for_alg)):
+#         notes_for_alg[idx] = np.array(list(notes_for_alg[idx]))
 
     return notes_for_alg, notes_for_alg_inds
             
@@ -44,6 +44,7 @@ def midifile_to_dict(mid):
 
 
 def extract_notes(midi_file):
+    import os
     mid = mido.MidiFile(midi_file)
     
     mid_dict = midifile_to_dict(mid)

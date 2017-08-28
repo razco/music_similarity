@@ -21,9 +21,9 @@ def shift_notes(notes, shift):
     import copy
     notes = copy.deepcopy(notes)
     for curr_notes_idx in xrange(len(notes)):
-        curr_notes = notes[curr_notes_idx]
+        curr_notes = np.array(list(notes[curr_notes_idx]))
         curr_notes += shift
-        notes[curr_notes_idx] = curr_notes
+        notes[curr_notes_idx] = set(curr_notes)
     return notes
 
 
@@ -42,8 +42,14 @@ def run(notes1, notes2):
     run_window_levenshtein(notes1_shift, notes2)
 
 def calc_new_distance(left_ld, top_ld, diag_ld, music_1_val, music_2_val):
-    new_cost = 1.5
-    if np.all(music_1_val == music_2_val):
+    new_cost = np.inf
+    # dividing the len of the intersection by the maximum of the
+    # melodies length and checking it's larger than 0.5
+    # is essential for applying the single notes behavior on chords:
+    # we don't want to allow a match of 2 adjacent chords in melody i
+    # to the same chord on melody j
+    max_num_notes = max(len(music_1_val), len(music_2_val))
+    if 1.0 * len(music_1_val.intersection(music_2_val)) / max_num_notes > 0.5:
         new_cost = 0.0
     new_dist = np.min(np.array([left_ld + 1, top_ld + 1, diag_ld + new_cost]))
     return new_dist
