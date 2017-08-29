@@ -11,7 +11,9 @@ pygame.init()
 pygame.midi.init()
 
 # playing music!
-pygame.mixer.music.load("part_melody.mid")
+# pygame.mixer.music.load('part_melody_Sugababes - Shape.mid')
+pygame.mixer.music.load('part_melody_sting - shape of my heart.mid')
+# pygame.mixer.music.load('midi_files/Sugababes - Shape.mid')
 pygame.mixer.music.play()
 while pygame.mixer.music.get_busy():
     pygame.time.wait(1000)

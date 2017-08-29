@@ -58,22 +58,35 @@ def calc_new_distance(left_ld, top_ld, diag_ld, music_1_val, music_2_val):
     return new_dist
 
 
-def run_window_levenshtein(music_1, music_2):
-    window_size = 10
-    assert len(music_1) >= 10 and len(music_2) >= 10
+def run_window_levenshtein(music_1, music_2, debug=False):
+    import pickle
+    window_size = 12
+    assert len(music_1) >= window_size and len(music_2) >= window_size
     max_score = window_size * 999.0
     max_score_music_1_idx = -1
     max_score_music_2_idx = -1
+    print ''
     for music_1_win_idx in xrange(0, len(music_1) - window_size + 1):
+        sys.stdout.write(
+            '%d/%d\r' % (music_1_win_idx, len(music_1) - window_size))
         rel_music_1 = music_1[music_1_win_idx:music_1_win_idx + window_size]
         for music_2_win_idx in xrange(0, len(music_2) - window_size + 1):
-            rel_music_2 = music_2[music_2_win_idx:music_2_win_idx + window_size]
+            rel_music_2 = music_2[
+                music_2_win_idx:music_2_win_idx + window_size]
             levenshtein_mat = run_levenshtein(rel_music_1, rel_music_2)
+            if debug:
+                pickle.dump({
+                    'notes1': rel_music_1, 'notes2': rel_music_2,
+                    'mat': levenshtein_mat
+                }, open('debug_output/%d_%d.pickle' % (
+                    music_1_win_idx, music_2_win_idx), 'wb')
+                )
             score = levenshtein_mat[len(rel_music_1), len(rel_music_2)]
             if score < max_score:
                 max_score = score
                 max_score_music_1_idx = music_1_win_idx
                 max_score_music_2_idx = music_2_win_idx
+    print ''
     print (
         'best match with window: %f at music1 index %d, and music2 index %d' %
         (max_score, max_score_music_1_idx, max_score_music_2_idx)
@@ -127,8 +140,8 @@ def load_args():
 
 def main():
     midi_file1, midi_file2 = load_args()
-    notes1 = extract_notes(midi_file1)
-    notes2 = extract_notes(midi_file2)
+    notes1, notes1_inds = extract_notes(midi_file1)
+    notes2, notes2_inds = extract_notes(midi_file2)
     run(notes1, notes2)
 
 
