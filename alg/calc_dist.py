@@ -54,8 +54,11 @@ def calc_new_distance(left_ld, top_ld, diag_ld, music_1_val, music_2_val):
     max_num_notes = max(len(music_1_val), len(music_2_val))
     if 1.0 * len(music_1_val.intersection(music_2_val)) / max_num_notes > 0.5:
         new_cost = 0.0
-    new_dist = np.min(np.array([left_ld + 1, top_ld + 1, diag_ld + new_cost]))
-    return new_dist
+
+    new_costs = np.array([left_ld + 1, top_ld + 1, diag_ld + new_cost])
+    new_dist = np.min(new_costs)
+    new_dist_direction = np.flatnonzero(new_costs == new_dist)
+    return new_dist, new_dist_direction
 
 
 def run_window_levenshtein(music_1, music_2, debug=False):
@@ -99,7 +102,7 @@ def run_levenshtein(music_1, music_2):
         lm_1_idx = music_1_idx + 1  # levenshtein_mat idx for music 1
         for music_2_idx in range(len(music_2)):
             lm_2_idx = music_2_idx + 1  # levenshtein_mat idx for music 2
-            new_dist = calc_new_distance(
+            new_dist, new_dist_direction = calc_new_distance(
                 levenshtein_mat[lm_1_idx, lm_2_idx - 1],
                 levenshtein_mat[lm_1_idx - 1, lm_2_idx],
                 levenshtein_mat[lm_1_idx - 1, lm_2_idx - 1],
