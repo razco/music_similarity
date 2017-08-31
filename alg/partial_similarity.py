@@ -10,10 +10,11 @@ DIRECTION_LEFT, DIRECTION_UP, DIRECTION_DIAGONAL = range(3)
 class PartialSimilarPath(object):
     def __init__(self, direction, is_success, prev_similar_path=None):
         # ep is an abbreviation for "previous error":
-        # the error prior to the last success
+        # the error until the last success
         self._ep = 0 if prev_similar_path is None else prev_similar_path.ep
         # lp is an abbreviation for "previous length":
-        # the path length prior to the last success
+        # the path length until the last success
+        # (include the last success)
         self._lp = 0 if prev_similar_path is None else prev_similar_path.lp
         # el is an abbreviation for "left error":
         # the left error after the last success
