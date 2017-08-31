@@ -3,8 +3,8 @@ Created on Aug 31, 2017
 @author: Raz
 '''
 
-
-DIRECTION_LEFT, DIRECTION_UP, DIRECTION_DIAGONAL = range(3)
+NUM_DIRECTIONS = 3
+DIRECTION_LEFT, DIRECTION_UP, DIRECTION_DIAGONAL = range(NUM_DIRECTIONS)
 
 
 class PartialSimilarPath(object):

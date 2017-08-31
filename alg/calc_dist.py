@@ -8,6 +8,7 @@ import numpy as np
 import getopt
 import sys
 import os
+from alg import partial_similarity
 
 
 def init_levenshtein_mat(notes1, notes2):
@@ -55,7 +56,12 @@ def calc_new_distance(left_ld, top_ld, diag_ld, music_1_val, music_2_val):
     if 1.0 * len(music_1_val.intersection(music_2_val)) / max_num_notes > 0.5:
         new_cost = 0.0
 
-    new_costs = np.array([left_ld + 1, top_ld + 1, diag_ld + new_cost])
+    new_costs = np.empty(partial_similarity.NUM_DIRECTIONS) + np.nan
+    new_costs[partial_similarity.DIRECTION_LEFT] = left_ld + 1
+    new_costs[partial_similarity.DIRECTION_UP] = top_ld + 1
+    new_costs[partial_similarity.DIRECTION_DIAGONAL] = diag_ld + new_cost
+    assert np.all(~np.isnan(new_costs))
+
     new_dist = np.min(new_costs)
     new_dist_direction = np.flatnonzero(new_costs == new_dist)
     return new_dist, new_dist_direction
