@@ -27,13 +27,13 @@ class PartialSimilarPath(object):
             0 if prev_similar_path is None else prev_similar_path.score)
 
         if prev_similar_path is not None:
-            self.__set_new_params(is_success, direction)
+            self.__extend_path(is_success, direction)
 
     @classmethod
     def empty_instance(cls):
         return cls(None, None, None)
 
-    def __set_new_params(self, is_success, direction=DIRECTION_DIAGONAL):
+    def __extend_path(self, is_success, direction=DIRECTION_DIAGONAL):
         if not is_success:
             if direction == DIRECTION_LEFT:
                 self._el += 1
