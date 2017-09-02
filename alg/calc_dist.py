@@ -11,6 +11,37 @@ import os
 from alg import partial_similarity
 
 
+def init_levenshtein_partial_distance_mat(notes1, notes2):
+    levenshtein_direction_mat = np.zeros(
+        (len(notes1)+1, len(notes2)+1)) + np.nan
+    levenshtein_direction_mat[0, 0] = (
+        partial_similarity.PartialSimilarPath.empty_instance())
+
+    # initialize x direction
+    for x in xrange(1, levenshtein_direction_mat.shape[1]):
+        levenshtein_direction_mat[0, x] = (
+            partial_similarity.PartialSimilarPath(
+                partial_similarity.DIRECTION_LEFT, False,
+                levenshtein_direction_mat[0, x - 1]
+            )
+        )
+
+    # initialize y direction
+    for y in xrange(1, levenshtein_direction_mat.shape[0]):
+        levenshtein_direction_mat[y, 0] = (
+            partial_similarity.PartialSimilarPath(
+                partial_similarity.DIRECTION_UP, False,
+                levenshtein_direction_mat[y - 1, 0]
+            )
+        )
+
+    return levenshtein_direction_mat
+
+
+def init_levenshtein_derivatives_mat(notes1, notes2):
+    pass
+
+
 def init_levenshtein_mat(notes1, notes2):
     levenshtein_mat = np.zeros((len(notes1)+1, len(notes2)+1))
     levenshtein_mat[0, :] = np.arange(0, len(notes2)+1)
@@ -39,10 +70,11 @@ def run(notes1, notes2):
             levenshtein_mat.shape[0] - 1, levenshtein_mat.shape[1] - 1]
         print 'score: %f' % score
         scores.append(score)
-    print 'running window...'
+    print 'finding best shift...'
     max_score_shift = np.argmin(np.array(scores))
     notes1_shift = shift_notes(notes1, max_score_shift)
-    run_window_levenshtein(notes1_shift, notes2)
+#     print 'running window...'
+#     run_window_levenshtein(notes1_shift, notes2)
 
 
 def calc_new_distance(left_ld, top_ld, diag_ld, music_1_val, music_2_val):
@@ -104,6 +136,7 @@ def run_window_levenshtein(music_1, music_2, debug=False):
 
 def run_levenshtein(music_1, music_2):
     levenshtein_mat = init_levenshtein_mat(music_1, music_2)
+    levenshtein_direction_mat = init_levenshtein_partial_distance_mat(music_1, music_2)
     for music_1_idx in range(len(music_1)):
         lm_1_idx = music_1_idx + 1  # levenshtein_mat idx for music 1
         for music_2_idx in range(len(music_2)):
