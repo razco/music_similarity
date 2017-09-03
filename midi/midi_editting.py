@@ -43,19 +43,6 @@ def test():
     aaa.save('part_melody.mid')
 
 
-def print_mat(mat):
-    import sys
-    if len(mat.shape) == 2:
-        for y in xrange(mat.shape[0]):
-            for x in xrange(mat.shape[1]):
-                sys.stdout.write('%d\t' % mat[y][x])
-            print ''
-    else:
-        for x in xrange(mat.shape[0]):
-            sys.stdout.write('%s   ' % str(list(mat[x])))
-        print ''
-
-
 def run(midi_file, midi_notes_inds, midi_series_len, midi_start_note):
     orig_note_ind_to_keep_start = midi_notes_inds[midi_start_note]
     orig_note_ind_to_keep_end = (

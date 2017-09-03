@@ -9,11 +9,12 @@ import getopt
 import sys
 import os
 from alg import partial_similarity
+import utils
 
 
 def init_levenshtein_partial_distance_mat(notes1, notes2):
-    levenshtein_direction_mat = np.zeros(
-        (len(notes1)+1, len(notes2)+1)) + np.nan
+    levenshtein_direction_mat = np.empty(
+        (len(notes1)+1, len(notes2)+1), dtype=object)
     levenshtein_direction_mat[0, 0] = (
         partial_similarity.PartialSimilarPath.empty_instance())
 
@@ -39,7 +40,21 @@ def init_levenshtein_partial_distance_mat(notes1, notes2):
 
 
 def init_levenshtein_derivatives_mat(notes1, notes2):
-    pass
+    levenshtein_derivatives_mat = np.empty(
+        (len(notes1)+1, len(notes2)+1), dtype=object)
+
+    # initialize x direction
+    for x in xrange(1, levenshtein_derivatives_mat.shape[1]):
+        levenshtein_derivatives_mat[0][x] = set()
+        levenshtein_derivatives_mat[0][x].add(
+            partial_similarity.DIRECTION_LEFT)
+
+    # initialize y direction
+    for y in xrange(1, levenshtein_derivatives_mat.shape[0]):
+        levenshtein_derivatives_mat[y][0] = set()
+        levenshtein_derivatives_mat[y][0].add(
+            partial_similarity.DIRECTION_UP)
+    return levenshtein_derivatives_mat
 
 
 def init_levenshtein_mat(notes1, notes2):
@@ -60,19 +75,34 @@ def shift_notes(notes, shift):
 
 
 def run(notes1, notes2):
+    '''
+    Calculates the best notes shift for melody 1.
+    With this shift, the melodies have minimum difference overall
+    Later, it returns the directions mat of the best shift
+
+    notes1: notes of melody no. 1
+    notes2: notes of melody no. 2
+    return: directions mat corresponding to the
+            Levenshtein mat of the best shift
+    '''
     num_diff_notes = 12
     scores = []
+    levenshtein_directions_mats = []
     for shift in xrange(num_diff_notes):
         print 'running shift%d:' % shift
         notes1_shift = shift_notes(notes1, shift)
-        levenshtein_mat = run_levenshtein(notes1_shift, notes2)
+        levenshtein_mat, levenshtein_directions_mat = run_levenshtein(
+            notes1_shift, notes2)
         score = levenshtein_mat[
             levenshtein_mat.shape[0] - 1, levenshtein_mat.shape[1] - 1]
         print 'score: %f' % score
         scores.append(score)
+        levenshtein_directions_mats.append(levenshtein_directions_mat)
     print 'finding best shift...'
     max_score_shift = np.argmin(np.array(scores))
-    notes1_shift = shift_notes(notes1, max_score_shift)
+    print 'best shift is %d' % max_score_shift
+    return levenshtein_directions_mats[max_score_shift]
+#     notes1_shift = shift_notes(notes1, max_score_shift)
 #     print 'running window...'
 #     run_window_levenshtein(notes1_shift, notes2)
 
@@ -95,8 +125,8 @@ def calc_new_distance(left_ld, top_ld, diag_ld, music_1_val, music_2_val):
     assert np.all(~np.isnan(new_costs))
 
     new_dist = np.min(new_costs)
-    new_dist_direction = np.flatnonzero(new_costs == new_dist)
-    return new_dist, new_dist_direction
+    new_directions = set(np.flatnonzero(new_costs == new_dist))
+    return new_dist, new_directions
 
 
 def run_window_levenshtein(music_1, music_2, debug=False):
@@ -136,19 +166,21 @@ def run_window_levenshtein(music_1, music_2, debug=False):
 
 def run_levenshtein(music_1, music_2):
     levenshtein_mat = init_levenshtein_mat(music_1, music_2)
-    levenshtein_direction_mat = init_levenshtein_partial_distance_mat(music_1, music_2)
+    levenshtein_directions_mat = init_levenshtein_derivatives_mat(
+        music_1, music_2)
     for music_1_idx in range(len(music_1)):
         lm_1_idx = music_1_idx + 1  # levenshtein_mat idx for music 1
         for music_2_idx in range(len(music_2)):
             lm_2_idx = music_2_idx + 1  # levenshtein_mat idx for music 2
-            new_dist, new_dist_direction = calc_new_distance(
+            new_dist, new_directions = calc_new_distance(
                 levenshtein_mat[lm_1_idx, lm_2_idx - 1],
                 levenshtein_mat[lm_1_idx - 1, lm_2_idx],
                 levenshtein_mat[lm_1_idx - 1, lm_2_idx - 1],
                 music_1[music_1_idx], music_2[music_2_idx]
             )
             levenshtein_mat[lm_1_idx, lm_2_idx] = new_dist
-    return levenshtein_mat
+            levenshtein_directions_mat[lm_1_idx, lm_2_idx] = new_directions
+    return levenshtein_mat, levenshtein_directions_mat
 
 
 def extract_notes(midi_file):
