@@ -55,23 +55,40 @@ def run(midi_file, all_midi_notes_inds, midi_series_len, midi_start_note, track,
     for note_idx in xrange(midi_start_note, midi_start_note + midi_series_len):
         idxs = midi_notes_inds[note_idx]
         min_idx = min(min_idx, min(idxs))
-        max_idx = max(max_idx, min(idxs))
+        max_idx = max(max_idx, min(idxs))  # taking the min because it's the "note_on"
     orig_note_ind_to_keep_start = min_idx
     orig_note_ind_to_keep_end = max_idx
-#     orig_note_ind_to_keep_start = midi_notes_inds[midi_start_note]
-#     orig_note_ind_to_keep_end = (
-#         midi_notes_inds[midi_start_note + midi_series_len])
-
-#     rel_notes_inds = (
-#         midi_notes_inds[midi_start_note:midi_start_note + midi_series_len])
 
     aaa = mido.MidiFile(midi_file)
     for track_idx in xrange(len(aaa.tracks) - 1, -1, -1):
         if track_idx != track:
             aaa.tracks.pop(track_idx)
-    time_to_add = 0
+
+    notes_off_missed = []
+    for note_inds in midi_notes_inds[midi_start_note: midi_start_note + midi_series_len]:
+        curr_note_off = max(note_inds)
+        if curr_note_off > orig_note_ind_to_keep_end:
+            # max(note_inds) is the note off message of the note
+            notes_off_missed.append(curr_note_off)
+    if len(notes_off_missed) > 0:
+        # if there are notes off that outside orig_note_ind_to_keep_end,
+        # increase their time, so that when all the other messages that
+        # are not in the valid range are removed, the time remains ok.
+        time_to_add_to_missed_note_off = 0
+        max_note_off_missed = max(notes_off_missed)
+        notes_off_missed = set(notes_off_missed)
+        for idx in xrange(orig_note_ind_to_keep_end + 1, max_note_off_missed + 1):
+            msg = aaa.tracks[track][idx]
+            if idx in notes_off_missed:
+                msg.time += time_to_add_to_missed_note_off
+                time_to_add_to_missed_note_off = 0
+            else:
+                time_to_add_to_missed_note_off += msg.time
+
     for idx in xrange(len(aaa.tracks[track]) - 1, -1, -1):
         msg = aaa.tracks[track][idx]
+        if idx in notes_off_missed:
+            continue
         if 'note' in msg.type and (
                 idx < orig_note_ind_to_keep_start or
                 idx > orig_note_ind_to_keep_end
@@ -128,18 +145,18 @@ def main():
 #     midi_file1 = 'midi_files/sting - shape of my heart.mid'
     _, midi_notes_inds1 = midifile_to_notes.extract_notes(midi_file1)
     track = 0
-    channel = 10
-    midi_start_note1 = 30
-    midi_series_len1 = 3
+    channel = 7
+    midi_start_note1 = 103
+    midi_series_len1 = 12
     run(midi_file1, midi_notes_inds1, midi_series_len1, midi_start_note1, track, channel)
 
     midi_file2 = 'midi_files/felix_jaehn_aint_nobody.mid'
 #     midi_file2 = 'midi_files/Sugababes - Shape.mid'
     _, midi_notes_inds2 = midifile_to_notes.extract_notes(midi_file2)
     track = 0
-    channel = 6
-    midi_start_note2 = 2
-    midi_series_len2 = 3
+    channel = 3
+    midi_start_note2 = 40
+    midi_series_len2 = 11
     run(midi_file2, midi_notes_inds2, midi_series_len2, midi_start_note2, track, channel)
 
 
