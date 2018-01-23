@@ -20,13 +20,14 @@ def print_mat(mat):
         print ''
 
 
-def shift_notes(num_diff_notes, notes, shift):
+def shift_notes(num_diff_notes, notes, shift, do_mod):
     import copy
     notes = copy.deepcopy(notes)
     for curr_notes_idx in xrange(len(notes)):
         curr_notes = np.array(list(notes[curr_notes_idx]))
         curr_notes += shift
-        curr_notes %= num_diff_notes
+        if do_mod:
+            curr_notes %= num_diff_notes
         notes[curr_notes_idx] = set(curr_notes)
     return notes
 
