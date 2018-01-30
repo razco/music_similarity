@@ -22,8 +22,14 @@ pygame.midi.init()
 # pygame.mixer.music.load('midi_files/MIDI from felix_jaehn_aint_nobody.mid_step_4_remove_successive_same_chords_in_tracks.mid')
 
 
+
+
+# pygame.mixer.music.load('part_melody_Frere Jacques.mid')
+pygame.mixer.music.load('part_melody_Mahler Symphony No.1 Mov.3.mid')
+# pygame.mixer.music.load('part_melody_the carpenters - please mr postman.mid')
+# pygame.mixer.music.load('part_melody_portugal the man - feel it still.mid')
 # pygame.mixer.music.load('part_melody_chaka_khan_aint_nobody.mid')
-pygame.mixer.music.load('part_melody_felix_jaehn_aint_nobody.mid')
+# pygame.mixer.music.load('part_melody_felix_jaehn_aint_nobody.mid')
 # pygame.mixer.music.load('midi_files/chaka_khan_aint_nobody.mid')
 # pygame.mixer.music.load('midi_files/Feels - pharrel williams.mid')
 # pygame.mixer.music.load('midi_files/Sugababes - Shape_clean.mid')
@@ -32,6 +38,7 @@ pygame.mixer.music.load('part_melody_felix_jaehn_aint_nobody.mid')
 # pygame.mixer.music.load('midi_files/Sugababes - Shape.mid')
 # pygame.mixer.music.load('gagagaga_no_low_vol_dups.mid')
 # pygame.mixer.music.load('part_melody_Sugababes - Shape.mid')
+# pygame.mixer.music.load('part_melody_Feels - pharrel williams.mid')
 # pygame.mixer.music.load('part_melody_sting - shape of my heart.mid')
 # pygame.mixer.music.load('midi_files/Chaka Kahn - Ain\'t Nobody.mid')
 # pygame.mixer.music.load('midi_files/MIDI from chaka_khan_aint_nobody.mid.mid')

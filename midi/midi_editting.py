@@ -60,9 +60,6 @@ def run(midi_file, all_midi_notes_inds, midi_series_len, midi_start_note, track,
     orig_note_ind_to_keep_end = max_idx
 
     aaa = mido.MidiFile(midi_file)
-    for track_idx in xrange(len(aaa.tracks) - 1, -1, -1):
-        if track_idx != track:
-            aaa.tracks.pop(track_idx)
 
     notes_off_missed = []
     for note_inds in midi_notes_inds[midi_start_note: midi_start_note + midi_series_len]:
@@ -105,6 +102,10 @@ def run(midi_file, all_midi_notes_inds, midi_series_len, midi_start_note, track,
                     break
             aaa.tracks[track].pop(idx)
 
+    for track_idx in xrange(len(aaa.tracks) - 1, -1, -1):
+        if track_idx != track:
+            aaa.tracks.pop(track_idx)
+
     aaa.save('part_melody_%s' % midi_file.split('/')[-1])
 
 # running shift0:
@@ -141,22 +142,28 @@ def get_instrument_length(notes_inds, track, channel):
 def main():
     import midifile_to_notes
 
-    midi_file1 = 'midi_files/chaka_khan_aint_nobody.mid'
+# -1 "midi_files/Frere Jacques.mid" -2 "midi_files/Mahler Symphony No.1 Mov.3.mid"
+    midi_file1 = 'midi_files/Frere Jacques.mid'
+#     midi_file1 = 'midi_files/the carpenters - please mr postman.mid'
+#     midi_file1 = 'midi_files/chaka_khan_aint_nobody.mid'
 #     midi_file1 = 'midi_files/sting - shape of my heart.mid'
+#     midi_file1 = 'midi_files/Feels - pharrel williams.mid'
     _, midi_notes_inds1 = midifile_to_notes.extract_notes(midi_file1)
-    track = 0
-    channel = 7
-    midi_start_note1 = 103
-    midi_series_len1 = 12
+    track = 1
+    channel = 0
+    midi_start_note1 = 1
+    midi_series_len1 = 22
     run(midi_file1, midi_notes_inds1, midi_series_len1, midi_start_note1, track, channel)
 
-    midi_file2 = 'midi_files/felix_jaehn_aint_nobody.mid'
+    midi_file2 = 'midi_files/Mahler Symphony No.1 Mov.3.mid'
+#     midi_file2 = 'midi_files/portugal the man - feel it still.mid'
+#     midi_file2 = 'midi_files/felix_jaehn_aint_nobody.mid'
 #     midi_file2 = 'midi_files/Sugababes - Shape.mid'
     _, midi_notes_inds2 = midifile_to_notes.extract_notes(midi_file2)
-    track = 0
-    channel = 3
-    midi_start_note2 = 40
-    midi_series_len2 = 11
+    track = 5
+    channel = 4
+    midi_start_note2 = 0
+    midi_series_len2 = 27
     run(midi_file2, midi_notes_inds2, midi_series_len2, midi_start_note2, track, channel)
 
 
